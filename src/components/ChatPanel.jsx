@@ -59,8 +59,11 @@ export default function ChatPanel({
     regenerateChips();
   }, [currentStage, mode]);
 
-  // ── API call ────────────────────────────────────────────────────────────────
-  async function callAPI(history) {
+  // ── API call (streaming) ──────────────────────────────────────────────────────────
+  // Sends the request with stream: true and reads Server-Sent Events line by
+  // line. Calls onChunk(text) with each incremental delta so the UI updates
+  // in real time. Returns the full completed string when the stream closes.
+  async function callAPI(history, onChunk) {
     const response = await fetch("https://api.anthropic.com/v1/messages", {
       method: "POST",
       headers: {
@@ -72,6 +75,7 @@ export default function ChatPanel({
       body: JSON.stringify({
         model: MODEL,
         max_tokens: MAX_TOKENS.main,
+        stream: true,
         system: SYSTEM_PROMPT,
         // Remap internal "agent" role to "assistant" for the Anthropic API
         // and filter out synthesis banner messages which are not valid API turns
@@ -88,8 +92,53 @@ export default function ChatPanel({
       throw new Error(`API error: ${response.status}`);
     }
 
-    const data = await response.json();
-    return data.content[0].text;
+    // Read the response body as a stream of SSE lines
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let fullText = "";
+    let buffer = "";
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+
+      // Decode the incoming chunk and append to buffer
+      buffer += decoder.decode(value, { stream: true });
+
+      // Split on newlines and process each complete SSE line
+      const lines = buffer.split("\n");
+
+      // Keep the last incomplete line in the buffer for the next iteration
+      buffer = lines.pop();
+
+      for (const line of lines) {
+        // SSE data lines start with "data: "
+        if (!line.startsWith("data: ")) continue;
+
+        const json = line.slice(6).trim();
+
+        // Stream end sentinel
+        if (json === "[DONE]") break;
+
+        try {
+          const event = JSON.parse(json);
+
+          // Only content_block_delta events carry text tokens
+          if (
+            event.type === "content_block_delta" &&
+            event.delta?.type === "text_delta"
+          ) {
+            const chunk = event.delta.text;
+            fullText += chunk;
+            onChunk(fullText);
+          }
+        } catch {
+          // Malformed SSE line, skip silently
+        }
+      }
+    }
+
+    return fullText;
   }
 
   // ── Chip regeneration call ──────────────────────────────────────────────────
@@ -138,21 +187,30 @@ Example: ["What is the default split criterion?","How do I tune max depth?","Sho
 
     const userMessage = { role: "user", content: trimmed };
     const updatedHistory = [...messages, userMessage];
-    setMessages(updatedHistory);
+
+    // Add the user message and an empty agent placeholder immediately.
+    // The placeholder is updated in real time as streaming chunks arrive.
+    setMessages([...updatedHistory, { role: "agent", content: "" }]);
 
     try {
-      const agentText = await callAPI(updatedHistory);
-      const agentMessage = { role: "agent", content: agentText };
-      const finalHistory = [...updatedHistory, agentMessage];
+      // onChunk fires on every token and updates the agent message in place
+      const agentText = await callAPI(updatedHistory, (partialText) => {
+        setMessages([
+          ...updatedHistory,
+          { role: "agent", content: partialText },
+        ]);
+      });
+
+      // Final update with the complete text and stats
+      const finalHistory = [...updatedHistory, { role: "agent", content: agentText }];
       setMessages(finalHistory);
       updateStats(finalHistory);
     } catch (err) {
       console.error("API call failed:", err);
-      const errorMessage = {
-        role: "agent",
-        content: "Something went wrong. Please try again.",
-      };
-      setMessages([...updatedHistory, errorMessage]);
+      setMessages([
+        ...updatedHistory,
+        { role: "agent", content: "Something went wrong. Please try again." },
+      ]);
     } finally {
       setIsLoading(false);
     }

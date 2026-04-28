@@ -73,8 +73,8 @@ const styles = {
   container: {
     display: "flex",
     flexDirection: "column",
-    gap: 10,
-    padding: "12px 14px",
+    gap: 12,
+    padding: "14px 16px",
     backgroundColor: "#111110",
     border: "1px solid rgba(255,255,255,0.07)",
     borderRadius: 8,
@@ -87,7 +87,7 @@ const styles = {
   healthBlock: {
     display: "flex",
     flexDirection: "column",
-    gap: 6,
+    gap: 8,
   },
   healthHeader: {
     display: "flex",
@@ -96,19 +96,19 @@ const styles = {
   },
   label: {
     fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: 10,
+    fontSize: 11,
     letterSpacing: "0.07em",
-    color: "#54524e",
+    color: "#6a6a64",
     textTransform: "uppercase",
   },
   value: {
     fontFamily: "'IBM Plex Mono', monospace",
-    fontSize: 12,
+    fontSize: 13,
     color: "#e8e5dc",
   },
   track: {
     width: "100%",
-    height: 4,
+    height: 5,
     backgroundColor: "rgba(255,255,255,0.07)",
     borderRadius: 2,
     overflow: "hidden",

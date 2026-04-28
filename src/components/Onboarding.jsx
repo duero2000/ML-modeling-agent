@@ -78,7 +78,7 @@ Example format: ["What is the target variable?","When do I use this model?","Wha
       <div style={styles.inner}>
 
         {/* Header */}
-        <p style={styles.eyebrow}>ML Modeling Coach</p>
+        <p style={styles.eyebrow}>ML Modeling Agent</p>
         <h1 style={styles.heading}>Choose a model family</h1>
         <p style={styles.subheading}>
           Your selection primes the coaching context for all seven stages.
@@ -142,13 +142,13 @@ const styles = {
     display: "flex",
     alignItems: "center",
     justifyContent: "center",
-    minHeight: "100vh",
+    height: "100vh",
     width: "100vw",
     backgroundColor: "#0d0d0b",
     color: "#e8e5dc",
     fontFamily: "'IBM Plex Sans', sans-serif",
-    padding: "40px 24px",
     boxSizing: "border-box",
+    overflow: "hidden",
   },
   inner: {
     display: "flex",
@@ -156,7 +156,7 @@ const styles = {
     alignItems: "center",
     width: "100%",
     maxWidth: "720px",
-    gap: "24px",
+    gap: "16px",
   },
   eyebrow: {
     fontFamily: "'IBM Plex Mono', monospace",
