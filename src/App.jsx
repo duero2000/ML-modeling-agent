@@ -1,10 +1,11 @@
 // App.jsx
-// Root component. Owns all session state and routes between the two top-level
-// views: Onboarding (no model selected) and Chat (model selected).
+// Root component. Owns all session state and routes between the three top-level
+// views: PasscodeGate (not authenticated), Onboarding (no model selected), and Chat (model selected).
 // All state is passed down as props — no context, no global store.
 
 import { useState, useRef } from "react";
 import { MODES, STAGES } from "./config.js";
+import PasscodeGate from "./components/PasscodeGate.jsx";
 import Onboarding from "./components/Onboarding.jsx";
 import TopBar from "./components/TopBar.jsx";
 import Sidebar from "./components/Sidebar.jsx";
@@ -28,6 +29,7 @@ function buildInitialState() {
 }
 
 export default function App() {
+  const [authenticated, setAuthenticated] = useState(false);
   const [session, setSession] = useState(buildInitialState());
 
   // Holds the handleSynthesize function registered by ChatPanel once mounted.
@@ -81,6 +83,10 @@ export default function App() {
   }
 
   // ── View routing ────────────────────────────────────────────────────────────
+
+  if (!authenticated) {
+    return <PasscodeGate onSuccess={() => setAuthenticated(true)} />;
+  }
 
   if (!session.modelFamily) {
     return (
