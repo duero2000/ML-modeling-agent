@@ -2,8 +2,7 @@
 
 > I built this because I was tired of tabbing between previous projects, tutorials, lecture notes, textbooks, and half-remembered formulas every time I needed to think through a modeling problem. This is my single source of truth, an AI-powered agent that walks me through the full supervised modeling workflow, on demand, without the context-switching.
 
-![Demo](./assets/demo.gif)
-*Drop your demo GIF here after deployment*
+![Demo](./assets/Sample_Output.gif)
 
 ---
 
