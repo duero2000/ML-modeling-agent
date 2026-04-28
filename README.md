@@ -169,6 +169,19 @@ A few things I know need improvement and plan to address:
 
 ---
 
+## Responsible AI Use
+
+This project was developed with assistance from Claude, an AI assistant by 
+Anthropic, used as a coding partner throughout the build. All architectural 
+decisions, component design, system prompt engineering, and modeling content 
+were made by me and grounded in my own understanding of supervised learning 
+methods and ML workflow structure. AI assistance was used to accelerate 
+development and validate thinking on occasion, not to replace it. No real 
+user data is collected or stored. The app operates entirely in session memory 
+and resets on page refresh.
+
+---
+
 ## License
 
 MIT
